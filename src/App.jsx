@@ -1,71 +1,33 @@
-import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect } from "react";
 import "./App.css";
+import { useDispatch, useSelector } from "react-redux";
+import { handleChangeTodoInput, handleGetTodos, handleStoreTodos, handleUpdate } from "./redux/actions/todoAction";
+import TodoList from "./component/todoList";
 
 function App() {
-  const [taskData, setTaskData] = useState({
-    task: "",
-    assignTo: "",
-    priority: "",
-    estimatedTime: ""
-  });
-  const [tasks, setTasks] = useState([]);
-  // console.log(tasks);
-  // console.log(task);
 
-  // const handleSubmitButton = () => {
-  //     const getTasks = JSON.parse(localStorage.getItem("todos"));
-
-  //     if (typeof getTasks !== 'undefined' && getTasks !== null && getTasks.length > 0) {
-  //       const newArray = [...getTasks, task];
-  //       setTasks(newArray);
-  //       console.log("tasks", tasks);
-
-  //       localStorage.setItem('todos', JSON.stringify(newArray));
-  //     }else{
-  //       localStorage.setItem("todos", JSON.stringify([task]))
-  //     }
-  // };
-
-  /**
-   * Todo List
-   * task -> string -> input();
-   * assignTo -> string; [Dropdown]
-   * priority -> string -> [Dropdown];
-   * estimatedTime -> string -> input();
-   *
-   */
-
+  const dispatch = useDispatch();
+  const {todoInput, editIndex,todoList} = useSelector((state) => state.todoReducer); 
+  console.log('editIndex', editIndex)// Get the list of tasks from root reducer or store  by useSelector
   useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem("todos")) || [];
-    setTasks(storedTasks);
-  }, []);
+    dispatch(handleGetTodos())
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setTaskData(preData => ({
-      ...preData, [name]: value
-    }))
+    dispatch(handleChangeTodoInput(e.target.name, e.target.value))
   }
+  
   const handleSubmitButton = (e) => {
     e.preventDefault()
-    if (taskData.task) {
-      const updatedTasks = [...tasks, taskData];
-      setTasks(updatedTasks);
-
-      localStorage.setItem("todos", JSON.stringify(updatedTasks));
-
-      setTaskData({
-        task: "",
-        assignTo: "",
-        priority: "",
-        estimatedTime: ""
-      }); // Clear the input field after adding the task
+    if (editIndex !== null) {
+      dispatch(handleUpdate(editIndex, todoInput));
+    } else {
+      dispatch(handleStoreTodos(todoInput));
     }
   };
+
   return (
-    <div>
+    <div className="todo_area">
       <div className=" flex justify-center items-center gap-1 ">
         <form>
           <label htmlFor="taskInput">Todo Task</label>
@@ -74,13 +36,13 @@ function App() {
             type="text"
             name="task"
             placeholder="add your task"
-            value={taskData.task}
+            value={todoInput.task}
             onChange={handleInputChange}
           />
           {/* assign */}
           <label htmlFor="assign">Assign:</label>
 
-          <select name="assignTo" id="assign" value={taskData.assignTo} onChange={handleInputChange} >
+          <select name="assignTo" id="assign" value={todoInput.assignTo} onChange={handleInputChange} >
             <option value="siam">Siam</option>
             <option value="sudipta">Sudipta</option>
             <option value="foyez">foyez</option>
@@ -88,32 +50,21 @@ function App() {
           {/* priority */}
           <label htmlFor="priority">Priority:</label>
 
-          <select name="priority" id="priority" value={taskData.priority} onChange={handleInputChange}>
+          <select name="priority" id="priority" value={todoInput.priority} onChange={handleInputChange}>
             <option value="high">high</option>
             <option value="low">low</option>
             <option value="avg">avg</option>
             <option value="below">below</option>
           </select>
           {/* Estimated Date */}
-          <label htmlFor="estimatedTime">Estimated time</label>
-          <input type="date" id="estimatedTime" name="estimatedTime" value={taskData.estimatedTime} onChange={handleInputChange} />
-          <button type="button" onClick={handleSubmitButton}>Submit</button>
+          <label htmlFor="estimatedTime">Estimated time (Minutes)</label>
+          <input type="text" id="estimatedTime" name="estimatedTime" value={todoInput.estimatedTime} onChange={handleInputChange} />
+          <button type="button" onClick={handleSubmitButton}>{editIndex !== null ? "Update" : "Submit"}</button>
         </form>
       </div>
-      <div>
-      {tasks.length > 0 ? (
-          <ul>
-            {tasks.map((task, index) => (
-              <li key={index}>
-                Task: {task.task}, Assigned to: {task.assignTo}, 
-                Priority: {task.priority}, Estimated Time: {task.estimatedTime}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No tasks added</p>
-        )}
-      </div>
+
+      {/* Task View List  */}
+     <TodoList/>
     </div>
   );
 }

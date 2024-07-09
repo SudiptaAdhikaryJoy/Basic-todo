@@ -1,0 +1,5 @@
+export const CHANGE_TODO_INPUT = 'CHANGE_TODO_INPUT';
+export const STORE_TODO = 'STORE_TODO';
+export const GET_TODO_LIST = 'GET_TODO_LIST';
+export const EDIT_TODO_LIST = 'EDIT_TODO_LIST';
+export const UPDATE_TODO_LIST = 'UPDATE_TODO_LIST';
